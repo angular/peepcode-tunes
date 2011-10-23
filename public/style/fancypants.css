@@ -1,0 +1,78 @@
+body {
+    font-family: "Helvetica Neue", "Helvetica", "Calibri", "sans"
+}
+
+.albums {
+}
+
+.album {
+    font-style: italic;
+}
+
+.album .artist-name {
+    font-style: normal;
+    font-weight: lighter;
+    color: #999;
+}
+
+.album button.queue {
+}
+
+.playlist {
+    color: #eee;
+    background-color: #333;
+}
+
+.playlist button.control {
+}
+
+.playlist button.play {
+}
+
+.playlist button.play:hover {
+}
+
+.playlist button.pause {
+}
+
+.playlist button.pause:hover {
+}
+
+.playlist button.prev {
+}
+
+.playlist button.prev:hover {
+}
+
+.playlist button.next {
+}
+
+.playlist button.next:hover {
+}
+
+.playlist .album .queue.add {
+}
+
+.playlist .album.current {
+    background-color: #383838;
+}
+
+.playlist .album.current .tracks .current {
+    background-color: #995599;
+}
+
+.playlist .album .tracks li {
+    font-style: normal;
+    padding: .3em;
+}
+
+.library {
+}
+
+.library .album .queue.remove {
+}
+
+.library .album .tracks {
+}
+
+/* vim:set sw=4:ts=4:expandtab */

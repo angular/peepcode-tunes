@@ -1,0 +1,63 @@
+<!doctype html>
+
+<!--[if lt IE 7]> <html lang="en" class="no-js ie6"> <![endif]-->
+<!--[if IE 7]>    <html lang="en" class="no-js ie7"> <![endif]-->
+<!--[if IE 8]>    <html lang="en" class="no-js ie8"> <![endif]-->
+<!--[if IE 9]>    <html lang="en" class="no-js ie9"> <![endif]-->
+<!--[if (gt IE 9)|!(IE)]><!--> <html lang="en" class="no-js"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+
+    <title>Backbone Tunes</title>
+    <meta name="author" content="David Goodlad <david@goodlad.ca>">
+
+    <link rel="stylesheet" href="style/screen.css" media="screen, projection">
+    <link rel="stylesheet" href="style/fancypants.css" media="screen, projection">
+
+    <script src="js/vendor/modernizr-1.6.min.js"></script>
+    <script src="js/vendor/jquery-1.5.1.min.js"></script>
+    <script src="js/vendor/underscore.js"></script>
+    <script src="js/vendor/backbone.js"></script>
+    <script src="js/Tunes.js"></script>
+
+    <script type="text/template" id="library-template">
+      <h1>Music Library</h1>
+      <ul class="albums"></ul>
+    </script>
+
+    <script type="text/template" id="playlist-template">
+      <h1>Playlist</h1>
+      <nav>
+        <button class="control play">Play</button>
+        <button class="control pause">Pause</button>
+        <button class="control prev">Prev</button>
+        <button class="control next">Next</button>
+      </nav>
+      <ul class="albums">
+      </ul>
+    </script>
+
+    <script type="text/template" id="album-template">
+      <button class="queue add"><img src="/images/add.png"></button>
+      <button class="queue remove"><img src="/images/remove.png"></button>
+      <span class="album-title"><%= title %></span>&nbsp;&nbsp;
+      <span class="artist-name"><%= artist %></span>
+      <ol class="tracks">
+        <% _.each(tracks, function(track) { %>
+          <li><%= track.title %></li>
+        <% }); %>
+      </ol>
+    </script>
+
+    <script type="application/javascript">
+      jQuery(function() {
+        window.library.fetch();
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="container">
+    </div>
+  </body>
+</html>

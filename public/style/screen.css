@@ -1,0 +1,129 @@
+html, body {
+  height: 100%;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#container {
+  height: auto;
+  min-height: 100%;
+	position: relative;
+}
+
+.albums {
+    list-style: none;
+    padding: 0 2%;
+}
+
+.album {
+    list-style: none;
+    display: inline-block;
+    position: relative;
+    width: 80%;
+    margin: 0;
+    padding: 1em 2em;
+}
+
+.album .artist-name {
+}
+
+.album .tracks {
+    margin: 0;
+    padding: .5em 0 0 1.5em;
+}
+
+.album button.queue {
+    position: absolute;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.playlist {
+    position: absolute;
+    width: 30%;
+    padding: 0 3%;
+    min-height: 100%;
+}
+
+nav {
+    width: 180px;
+    margin: auto;
+    padding: 0;
+}
+
+nav button.control {
+    text-indent: -9999px;
+    width: 55px;
+    height: 50px;
+    border: 0;
+    padding: 10px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+nav button.play {
+    background: url('/images/control_play.png') center no-repeat;
+}
+
+nav button.play:hover {
+    background: url('/images/control_play_hover.png') center no-repeat;
+}
+
+nav button.pause {
+    background: url('/images/control_pause.png') center no-repeat;
+}
+
+nav button.pause:hover {
+    background: url('/images/control_pause_hover.png') center no-repeat;
+}
+
+nav button.prev {
+    background: url('/images/control_start.png') center no-repeat;
+}
+
+nav button.prev:hover {
+    background: url('/images/control_start_hover.png') center no-repeat;
+}
+
+nav button.next {
+    background: url('/images/control_end.png') center no-repeat;
+}
+
+nav button.next:hover {
+    background: url('/images/control_end_hover.png') center no-repeat;
+}
+
+.playlist .album .queue.add {
+    display: none;
+}
+
+.playlist .album.current {
+}
+
+.playlist .album.current .tracks .current {
+}
+
+.library {
+	margin-left: 36%;
+	padding: 0.1em 2%;
+}
+
+.library .album .queue.remove {
+    display: none;
+}
+
+.library .album .tracks {
+    display: none;
+}
+
+/* vim:set sw=4:ts=4:expandtab */
