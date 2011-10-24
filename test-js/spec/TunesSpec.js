@@ -24,218 +24,241 @@ var albumData = [{
     }]
 }];
 
-describe("Album", function () {
 
-    beforeEach(function () {
-        this.album = new Album(albumData[0]);
-    });
+describe('TunesCtrl', function() {
 
-    it("creates from data", function () {
-        expect(this.album.get('tracks').length).toEqual(2);
-    });
+  it('should initialize the scope for the view', function() {
+    var rootScope = angular.scope(),
+        xhrMock = rootScope.$service('$browser').xhr,
+        ctrlScope;
 
-    describe("first track", function () {
+    xhrMock.expectGET('/albums').respond(albumData);
+    ctrlScope = rootScope.$new(TunesCtrl);
 
-        it("returns true for first track", function () {
-            expect(this.album.isFirstTrack(0)).toBeTruthy();
-        });
+    expect(ctrlScope.player.playlist.length).toBe(0);
+    expect(ctrlScope.albums).toBeUndefined();
 
-        it("returns false for other tracks", function () {
-            expect(this.album.isFirstTrack(12)).toBeFalsy();
-        });
+    xhrMock.flush();
 
-    });
-
-    describe("last track", function () {
-
-        it("returns true for last track", function () {
-            expect(this.album.isLastTrack(1)).toBeTruthy();
-        });
-
-        it("returns false for other tracks", function () {
-            expect(this.album.isLastTrack(0)).toBeFalsy();
-        });
-
-    });
-
-    describe("track url at index", function () {
-
-        it("returns URL for existing track", function () {
-            expect(this.album.trackUrlAtIndex(0))
-                .toEqual('/music/Album A Track A.mp3');
-        });
-
-        it("returns null for non-existing track", function () {
-            expect(this.album.trackUrlAtIndex(5)).toBe(null);
-        });
-
-    });
-
+    expect(ctrlScope.albums).toBe(albumData);
+  });
 });
 
-describe("Playlist", function() {
-  
+
+describe('player service', function() {
+  var player,
+      audioMock;
+
+
   beforeEach(function() {
-      this.playlist = new Playlist();
-      this.playlist.add(albumData[0]);
-  });
-  
-  it("has models", function () {
-      expect(this.playlist.models.length).toEqual(1);
-  });
-  
-  it("identifies first album as first", function() {
-      expect(this.playlist.isFirstAlbum(0)).toBeTruthy();
+    audioMock = {
+      play: jasmine.createSpy('play'),
+      pause: jasmine.createSpy('pause'),
+      src: undefined,
+      addEventListener: jasmine.createSpy('addEventListener')
+    };
+
+    player = angular.service('player')(audioMock);
   });
 
-  it("rejects non-first album as first", function() {
-      expect(this.playlist.isFirstAlbum(1)).toBeFalsy();
+
+  it('should initialize the player', function() {
+    expect(player.playlist.length).toBe(0);
+    expect(player.playing).toBe(false);
+    expect(player.current).toEqual({album: 0, track: 0});
   });
 
-  it("identifies last album as last", function() {
-      this.playlist.add(albumData[1]); // Extra album as the last
-      expect(this.playlist.isLastAlbum(1)).toBeTruthy();
+
+  it('should register an ended event listener on adio', function() {
+    expect(audioMock.addEventListener).toHaveBeenCalled();
   });
 
-  it("rejects non-last album as last", function() {
-      this.playlist.add(albumData[1]); // Extra album as the last
-      expect(this.playlist.isLastAlbum(0)).toBeFalsy();
+
+  describe('play', function() {
+    it('should not do anything if playlist is empty', function() {
+      player.play();
+      expect(player.playing).toBe(false);
+      expect(audioMock.play).not.toHaveBeenCalled();
+    });
+
+
+    it('should play the currently selected song', function() {
+      player.playlist.add(albumData[0]);
+      player.play();
+      expect(player.playing).toBe(true);
+      expect(audioMock.play).toHaveBeenCalled();
+      expect(audioMock.src).toBe("/music/Album A Track A.mp3");
+    });
+
+
+    it('should resume playing a song after paused', function() {
+      player.playlist.add(albumData[0]);
+      player.play();
+      player.pause();
+      audioMock.play.reset();
+      audioMock.src = 'test'; // player must not touch the src property when resuming play
+      player.play();
+      expect(player.playing).toBe(true);
+      expect(audioMock.play).toHaveBeenCalled();
+      expect(audioMock.src).toBe('test');
+    });
   });
-    
+
+
+  describe('pause', function() {
+    it('should not do anything if player is not playing', function() {
+      player.pause();
+      expect(player.playing).toBe(false);
+      expect(audioMock.pause).not.toHaveBeenCalled();
+    });
+
+    it('should pause the player when playing', function() {
+      player.playlist.add(albumData[0]);
+      player.play();
+      expect(player.playing).toBe(true);
+      player.pause();
+      expect(player.playing).toBe(false);
+      expect(audioMock.pause).toHaveBeenCalled();
+    });
+  });
+
+
+  describe('reset', function() {
+    it('should stop currently playing song and reset the internal state', function() {
+      player.playlist.add(albumData[0]);
+      player.current.track = 1;
+      player.play();
+      expect(player.playing).toBe(true);
+
+      player.reset();
+      expect(player.playing).toBe(false);
+      expect(audioMock.pause).toHaveBeenCalled();
+      expect(player.current).toEqual({album: 0, track: 0});
+    });
+  });
+
+
+  describe('next', function() {
+    it('should do nothing if playlist is empty', function() {
+      player.next();
+      expect(player.current).toEqual({album: 0, track: 0});
+    });
+
+    it('should advance to the next song in the album', function() {
+      player.playlist.add(albumData[0]);
+      player.next();
+      expect(player.current).toEqual({album: 0, track: 1});
+    });
+
+    it('should wrap around when on last song and there is just one album in playlist', function() {
+      player.playlist.add(albumData[0]);
+      player.next();
+      player.next();
+      expect(player.current).toEqual({album: 0, track: 0});
+    });
+
+    it('should wrap around when on last song and there are multiple albums in playlist', function() {
+      player.playlist.add(albumData[0]);
+      player.playlist.add(albumData[1]);
+      player.current.album = 1;
+      player.current.track = 1;
+      player.next();
+      expect(player.current).toEqual({album: 0, track: 0});
+    });
+
+    it('should start playing the next song if currently playing', function() {
+      player.playlist.add(albumData[0]);
+      player.play();
+      audioMock.play.reset();
+      player.next();
+      expect(player.playing).toBe(true);
+      expect(audioMock.play).toHaveBeenCalled();
+      expect(audioMock.src).toBe('/music/Album A Track B.mp3');
+    });
+  });
+
+
+  describe('previous', function() {
+    it('should do nothing if playlist is empty', function() {
+      player.previous();
+      expect(player.current).toEqual({album: 0, track: 0});
+    });
+
+    it('should move to the previous song in the album', function() {
+      player.playlist.add(albumData[0]);
+      player.next();
+      player.previous();
+      expect(player.current).toEqual({album: 0, track: 0});
+    });
+
+    it('should wrap around when on first song and there is just one album in playlist', function() {
+      player.playlist.add(albumData[0]);
+      player.previous();
+      expect(player.current).toEqual({album: 0, track: 1});
+    });
+
+    it('should wrap around when on first song and there are multiple albums in playlist', function() {
+      player.playlist.add(albumData[0]);
+      player.playlist.add(albumData[1]);
+      player.previous();
+      expect(player.current).toEqual({album: 1, track: 1});
+    });
+
+    it('should start playing the next song if currently playing', function() {
+      player.playlist.add(albumData[0]);
+      player.play();
+      audioMock.play.reset();
+      player.previous();
+      expect(player.playing).toBe(true);
+      expect(audioMock.play).toHaveBeenCalled();
+      expect(audioMock.src).toBe('/music/Album A Track B.mp3');
+    });
+  });
+
+
+  describe('playlist', function() {
+    it('should be a simple array', function() {
+      expect(player.playlist.constructor).toBe([].constructor);
+    });
+
+
+    describe('add', function() {
+      it("should add an album to the playlist if it's not present there already", function() {
+        expect(player.playlist.length).toBe(0);
+        player.playlist.add(albumData[0]);
+        expect(player.playlist.length).toBe(1);
+        player.playlist.add(albumData[1]);
+        expect(player.playlist.length).toBe(2);
+        player.playlist.add(albumData[0]);
+        expect(player.playlist.length).toBe(2); // nothing happened, already there
+      });
+    });
+
+
+    describe('remove', function() {
+      it('should remove an album from the playlist if present', function() {
+        player.playlist.add(albumData[0]);
+        player.playlist.add(albumData[1]);
+        expect(player.playlist.length).toBe(2);
+
+        player.playlist.remove(albumData[0]);
+        expect(player.playlist.length).toBe(1);
+        expect(player.playlist[0].title).toBe('Album B');
+
+        player.playlist.remove(albumData[1]);
+        expect(player.playlist.length).toBe(0);
+
+        player.playlist.remove(albumData[0]); // nothing happend, not in the playlist
+        expect(player.playlist.length).toBe(0);
+      });
+    });
+  });
 });
 
-describe("Player", function () {
 
-    describe("with no items", function () {
-
-        beforeEach(function () {
-            this.player = new Player();
-        });
-
-        it("starts with album 0", function () {
-            expect(this.player.get('currentAlbumIndex')).toEqual(0);
-        });
-
-        it("starts with track 0", function () {
-            expect(this.player.get('currentTrackIndex')).toEqual(0);
-        });
-
-    });
-
-    describe("with added album", function () {
-
-        beforeEach(function () {
-            this.player = new Player();
-            this.player.playlist.add(albumData[0]);
-        });
-
-        it("is in 'stop' state", function () {
-            expect(this.player.get('state')).toEqual('stop');
-        });
-        
-        it("is stopped", function() {
-            expect(this.player.isStopped()).toBeTruthy();
-        });
-
-        describe("while playing", function () {
-
-            beforeEach(function () {
-                this.player.play();
-            });
-
-            it("sets to 'play' state", function () {
-                expect(this.player.get('state')).toEqual('play');
-            });
-
-            it("is playing", function() {
-                expect(this.player.isPlaying()).toBeTruthy();
-            });
-
-            it("has a current album", function () {
-                expect(this.player.currentAlbum().get('title'))
-                    .toEqual('Album A');
-            });
-
-            it("has a current track URL", function () {
-                expect(this.player.currentTrackUrl())
-                    .toEqual("/music/Album A Track A.mp3");
-            });
-
-            it("pauses", function() {
-                this.player.pause();
-                expect(this.player.get('state')).toEqual('pause');
-            });
-
-            describe("next track", function () {
-
-                beforeEach(function() {
-                    // Add extra album to test 'next'
-                    this.player.playlist.add(albumData[1]);
-                });
-
-                it("increments within an album", function () {
-                    this.player.nextTrack();
-
-                    expect(this.player.get('currentAlbumIndex')).toEqual(0);
-                    expect(this.player.get('currentTrackIndex')).toEqual(1);
-                });
-
-                it("goes to the next album", function () {
-                    this.player.set({'currentTrackIndex': 1}); // Last track
-                    this.player.nextTrack();
-                    
-                    expect(this.player.get('currentAlbumIndex')).toEqual(1);
-                    expect(this.player.get('currentTrackIndex')).toEqual(0);
-                });
-
-                it("wraps around to the first album if at end", function () {
-                    this.player.set({'currentAlbumIndex': 1}); // Last album
-                    this.player.set({'currentTrackIndex': 1}); // Last track
-                    this.player.nextTrack();
-                    
-                    expect(this.player.get('currentAlbumIndex')).toEqual(0);
-                    expect(this.player.get('currentTrackIndex')).toEqual(0);
-                });
-
-            });
-
-            describe("previous track", function () {
-
-                beforeEach(function() {
-                    // Add extra album to test 'prev'
-                    this.player.playlist.add(albumData[1]);
-                });
-
-                it("goes to the previous track in an album", function () {
-                    this.player.set({'currentTrackIndex': 1});
-                    this.player.prevTrack();
-                    
-                    expect(this.player.get('currentAlbumIndex')).toEqual(0);
-                    expect(this.player.get('currentTrackIndex')).toEqual(0);
-                });
-            
-                it("goes to the last track of previous album", function() {
-                    this.player.set({'currentAlbumIndex': 1});
-                    this.player.set({'currentTrackIndex': 0});
-                    this.player.prevTrack();
-                    
-                    expect(this.player.get('currentAlbumIndex')).toEqual(0);
-                    expect(this.player.get('currentTrackIndex')).toEqual(1);
-                });
-                
-                it("wraps around if at the very beginning", function() {
-                    this.player.set({'currentAlbumIndex': 0});
-                    this.player.set({'currentTrackIndex': 0});
-                    this.player.prevTrack();
-                    
-                    expect(this.player.get('currentAlbumIndex')).toEqual(1);
-                    expect(this.player.get('currentTrackIndex')).toEqual(1);
-                });
-            
-            });
-
-        });
-
-    });
-
+describe('audio service', function() {
+  it('should create and return html5 audio element', function() {
+    var audio = angular.service('audio')([document]);
+    expect(audio.nodeName).toBe('AUDIO');
+  });
 });

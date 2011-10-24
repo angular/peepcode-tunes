@@ -47,6 +47,18 @@ body {
     cursor: pointer;
 }
 
+.album .queue.add {
+    background-image: url('/images/add.png');
+}
+
+.album .queue.remove {
+    background-image: url('/images/remove.png');
+}
+
+.album-title {
+    margin-right: 10px;
+}
+
 .playlist {
     position: absolute;
     width: 30%;
@@ -103,27 +115,9 @@ nav button.next:hover {
     background: url('/images/control_end_hover.png') center no-repeat;
 }
 
-.playlist .album .queue.add {
-    display: none;
-}
-
-.playlist .album.current {
-}
-
-.playlist .album.current .tracks .current {
-}
-
 .library {
 	margin-left: 36%;
 	padding: 0.1em 2%;
-}
-
-.library .album .queue.remove {
-    display: none;
-}
-
-.library .album .tracks {
-    display: none;
 }
 
 /* vim:set sw=4:ts=4:expandtab */
