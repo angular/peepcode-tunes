@@ -6,7 +6,7 @@ function TunesCtrl($xhr, player) {
 
   scope.player = player;
 
-  $xhr('GET', '/albums', function(statusCode, body) {
+  $xhr('GET', 'albums.json', function(statusCode, body) {
     scope.albums = body;
   });
 }

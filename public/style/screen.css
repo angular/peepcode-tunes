@@ -48,11 +48,11 @@ body {
 }
 
 .album .queue.add {
-    background-image: url('/images/add.png');
+    background-image: url('../images/add.png');
 }
 
 .album .queue.remove {
-    background-image: url('/images/remove.png');
+    background-image: url('../images/remove.png');
 }
 
 .album-title {
@@ -84,35 +84,35 @@ nav button.control {
 }
 
 nav button.play {
-    background: url('/images/control_play.png') center no-repeat;
+    background: url('../images/control_play.png') center no-repeat;
 }
 
 nav button.play:hover {
-    background: url('/images/control_play_hover.png') center no-repeat;
+    background: url('../images/control_play_hover.png') center no-repeat;
 }
 
 nav button.pause {
-    background: url('/images/control_pause.png') center no-repeat;
+    background: url('../images/control_pause.png') center no-repeat;
 }
 
 nav button.pause:hover {
-    background: url('/images/control_pause_hover.png') center no-repeat;
+    background: url('../images/control_pause_hover.png') center no-repeat;
 }
 
 nav button.prev {
-    background: url('/images/control_start.png') center no-repeat;
+    background: url('../images/control_start.png') center no-repeat;
 }
 
 nav button.prev:hover {
-    background: url('/images/control_start_hover.png') center no-repeat;
+    background: url('../images/control_start_hover.png') center no-repeat;
 }
 
 nav button.next {
-    background: url('/images/control_end.png') center no-repeat;
+    background: url('../images/control_end.png') center no-repeat;
 }
 
 nav button.next:hover {
-    background: url('/images/control_end_hover.png') center no-repeat;
+    background: url('../images/control_end_hover.png') center no-repeat;
 }
 
 .library {

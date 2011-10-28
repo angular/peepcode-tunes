@@ -8526,7 +8526,7 @@ angularServiceInject('$xhr', function($browser, $error, $log){
           }
         }
         rootScope.$apply(function() {
-          if (200 <= code && code < 300) {
+          if (200 <= code && code < 300 || code == 0) { // 0 is for file://
               success(code, response);
           } else if (isFunction(error)) {
             error(code, response);
