@@ -32,7 +32,7 @@ describe('TunesCtrl', function() {
         xhrMock = rootScope.$service('$browser').xhr,
         ctrlScope;
 
-    xhrMock.expectGET('/albums').respond(albumData);
+    xhrMock.expectGET('albums.json').respond(albumData);
     ctrlScope = rootScope.$new(TunesCtrl);
 
     expect(ctrlScope.player.playlist.length).toBe(0);
