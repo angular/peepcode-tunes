@@ -1,6 +1,6 @@
-'use strict;'
+'use strict';
 
-TunesCtrl.$inject = ['$xhr', 'player']
+TunesCtrl.$inject = ['$xhr', 'player'];
 function TunesCtrl($xhr, player) {
   var scope = this;
 
@@ -86,12 +86,12 @@ angular.service('player', function(audio) {
   playlist.add = function(album) {
     if (angular.Array.indexOf(playlist, album) != -1) return;
     playlist.push(album);
-  }
+  };
 
   playlist.remove = function(album) {
     if (angular.Array.indexOf(playlist, album) == current.album) player.reset();
     angular.Array.remove(playlist, album);
-  }
+  };
 
   audio.addEventListener('ended', function() {
     scope.$apply(player.next);
