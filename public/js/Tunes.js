@@ -29,11 +29,16 @@ angular.service('player', function(audio) {
 
     playing: false,
 
-    play: function() {
+    play: function(track, album) {
       if (!playlist.length) return;
+
+      if (angular.isDefined(track)) current.track = track;
+      if (angular.isDefined(album)) current.album = album;
+
       if (!paused) audio.src = playlist[current.album].tracks[current.track].url;
       audio.play();
       player.playing = true;
+      paused = false;
     },
 
     pause: function() {
@@ -56,12 +61,8 @@ angular.service('player', function(audio) {
       if (playlist[current.album].tracks.length > (current.track + 1)) {
         current.track++;
       } else {
-        if (playlist.length > (current.album + 1)) {
-          current.album++;
-        } else {
-          current.album = 0;
-        }
         current.track = 0;
+        current.album = (current.album + 1) % playlist.length;
       }
       if (player.playing) player.play();
     },
@@ -72,11 +73,7 @@ angular.service('player', function(audio) {
       if (current.track > 0) {
         current.track--;
       } else {
-        if (current.album > 0) {
-          current.album--;
-        } else {
-          current.album = playlist.length - 1;
-        }
+        current.album = (current.album - 1 + playlist.length) % playlist.length;
         current.track = playlist[current.album].tracks.length - 1;
       }
       if (player.playing) player.play();
