@@ -31,8 +31,9 @@
             <span class="album-title">{{album.title}}</span>
             <span class="artist-name">{{album.artist}}</span>
             <ol class="tracks">
-              <li ng:repeat="track in album.tracks"
-                  ng:class="player.current.track == $index && 'current'">{{track.title}}</li>
+              <li ng:repeat="track in album.tracks" class="track"
+                  ng:class="player.current.track == $index && 'current'"
+                  ng:click="player.play($index, $parent.$index)">{{track.title}}</li>
             </ol>
           </li>
         </ul>
