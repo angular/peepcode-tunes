@@ -27,7 +27,8 @@ body {
     padding: 1em 2em;
 }
 
-.album .artist-name {
+.track {
+  cursor: pointer;
 }
 
 .album .tracks {
