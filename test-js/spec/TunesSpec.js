@@ -25,23 +25,23 @@ var albumData = [{
 }];
 
 
+beforeEach(module('tunesApp'));
+
 describe('TunesCtrl', function() {
 
-  it('should initialize the scope for the view', function() {
-    var rootScope = angular.scope(),
-        xhrMock = rootScope.$service('$browser').xhr,
-        ctrlScope;
+  it('should initialize the scope for the view', inject(function($rootScope, $httpBackend) {
+    var ctrlScope;
 
-    xhrMock.expectGET('albums.json').respond(albumData);
-    ctrlScope = rootScope.$new(TunesCtrl);
+    $httpBackend.expectGET('albums.json').respond(albumData);
+    ctrlScope = $rootScope.$new(TunesCtrl);
 
     expect(ctrlScope.player.playlist.length).toBe(0);
     expect(ctrlScope.albums).toBeUndefined();
 
-    xhrMock.flush();
+    $httpBackend.flush();
 
     expect(ctrlScope.albums).toBe(albumData);
-  });
+  }));
 });
 
 
@@ -50,16 +50,19 @@ describe('player service', function() {
       audioMock;
 
 
-  beforeEach(function() {
+  beforeEach(module(function($provide) {
     audioMock = {
       play: jasmine.createSpy('play'),
       pause: jasmine.createSpy('pause'),
       src: undefined,
       addEventListener: jasmine.createSpy('addEventListener')
-    };
-
-    player = angular.service('player')(audioMock);
-  });
+    }
+    $provide.value('audio', audioMock);
+  }));
+  
+  beforeEach(inject(function($injector) {
+    player = $injector.get('player');
+  }));
 
 
   it('should initialize the player', function() {
@@ -257,8 +260,7 @@ describe('player service', function() {
 
 
 describe('audio service', function() {
-  it('should create and return html5 audio element', function() {
-    var audio = angular.service('audio')([document]);
+  it('should create and return html5 audio element', inject(function(audio) {
     expect(audio.nodeName).toBe('AUDIO');
-  });
+  }));
 });

@@ -1,105 +1,131 @@
 'use strict';
 
-TunesCtrl.$inject = ['$xhr', 'player'];
-function TunesCtrl($xhr, player) {
-  var scope = this;
+(function(window) {
 
-  scope.player = player;
+  var tunesApp = angular.module('tunesApp', []);
 
-  $xhr('GET', 'albums.json', function(statusCode, body) {
-    scope.albums = body;
+  // app with fake backend
+  var tunesAppFake = angular.module('tunesAppFake', ['tunesApp', 'ngMockE2E']);
+  tunesAppFake.run(function($httpBackend) {
+    $httpBackend.whenGET(/templates\/.*/).passThrough();
+    $httpBackend.whenGET('albums.json').respond([
+      {
+        "title": "test album",
+        "artist": "test artist",
+        "tracks": [
+          {
+            "title": "test track 1",
+            "url": "music/blue.mp3"
+          },
+          {
+            "title": "test track 2",
+            "url": "music/jazz.mp3"
+          }
+        ]
+      }
+    ]);
   });
-}
+
+  window.TunesCtrl = function($http, player) {
+    var scope = this;
+    scope.player = player;
+    $http.get('albums.json').success(function(data) {
+      scope.albums = data;
+    });
+  };
 
 
-angular.service('player', function(audio) {
-  var player,
-      playlist = [],
-      paused = false,
-      current = {
-        album: 0,
-        track: 0
+  tunesApp.factory('player', function(audio) {
+    var player,
+        playlist = [],
+        paused = false,
+        current = {
+          album: 0,
+          track: 0
+        },
+        scope = this;
+
+    player = {
+      playlist: playlist,
+
+      current: current,
+
+      playing: false,
+
+      play: function(track, album) {
+        if (!playlist.length) return;
+
+        if (angular.isDefined(track)) current.track = track;
+        if (angular.isDefined(album)) current.album = album;
+
+        if (!paused) audio.src = playlist[current.album].tracks[current.track].url;
+        audio.play();
+        player.playing = true;
+        paused = false;
       },
-      scope = this;
 
-  player = {
-    playlist: playlist,
+      pause: function() {
+        if (player.playing) {
+          audio.pause();
+          player.playing = false;
+          paused = true;
+        }
+      },
 
-    current: current,
-
-    playing: false,
-
-    play: function(track, album) {
-      if (!playlist.length) return;
-
-      if (angular.isDefined(track)) current.track = track;
-      if (angular.isDefined(album)) current.album = album;
-
-      if (!paused) audio.src = playlist[current.album].tracks[current.track].url;
-      audio.play();
-      player.playing = true;
-      paused = false;
-    },
-
-    pause: function() {
-      if (player.playing) {
-        audio.pause();
-        player.playing = false;
-        paused = true;
-      }
-    },
-
-    reset: function() {
-      player.pause();
-      current.album = 0;
-      current.track = 0;
-    },
-
-    next: function() {
-      if (!playlist.length) return;
-      paused = false;
-      if (playlist[current.album].tracks.length > (current.track + 1)) {
-        current.track++;
-      } else {
+      reset: function() {
+        player.pause();
+        current.album = 0;
         current.track = 0;
-        current.album = (current.album + 1) % playlist.length;
+      },
+
+      next: function() {
+        if (!playlist.length) return;
+        paused = false;
+        if (playlist[current.album].tracks.length > (current.track + 1)) {
+          current.track++;
+        } else {
+          current.track = 0;
+          current.album = (current.album + 1) % playlist.length;
+        }
+        if (player.playing) player.play();
+      },
+
+      previous: function() {
+        if (!playlist.length) return;
+        paused = false;
+        if (current.track > 0) {
+          current.track--;
+        } else {
+          current.album = (current.album - 1 + playlist.length) % playlist.length;
+          current.track = playlist[current.album].tracks.length - 1;
+        }
+        if (player.playing) player.play();
       }
-      if (player.playing) player.play();
-    },
+    };
 
-    previous: function() {
-      if (!playlist.length) return;
-      paused = false;
-      if (current.track > 0) {
-        current.track--;
-      } else {
-        current.album = (current.album - 1 + playlist.length) % playlist.length;
-        current.track = playlist[current.album].tracks.length - 1;
-      }
-      if (player.playing) player.play();
-    }
-  };
+    playlist.add = function(album) {
+      if (playlist.indexOf(album) != -1) return;
+      playlist.push(album);
+    };
 
-  playlist.add = function(album) {
-    if (angular.Array.indexOf(playlist, album) != -1) return;
-    playlist.push(album);
-  };
+    playlist.remove = function(album) {
+      var index = playlist.indexOf(album);
+      if (index == current.album) player.reset();
+      playlist.splice(index, 1);
+    };
 
-  playlist.remove = function(album) {
-    if (angular.Array.indexOf(playlist, album) == current.album) player.reset();
-    angular.Array.remove(playlist, album);
-  };
+    audio.addEventListener('ended', function() {
+      scope.$apply(player.next);
+    }, false);
 
-  audio.addEventListener('ended', function() {
-    scope.$apply(player.next);
-  }, false);
-
-  return player;
-});
+    return player;
+  });
 
 
-// extract the audio for making the player easier to test
-angular.service('audio', function($document) {
-  var audio = $document[0].createElement('audio');
-  return audio;
-});
+  // extract the audio for making the player easier to test
+  tunesApp.factory('audio', function($document) {
+    var audio = $document[0].createElement('audio');
+    return audio;
+  });
+
+})(window);
