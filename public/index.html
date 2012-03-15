@@ -28,13 +28,13 @@
         </nav>
         <ul class="albums">
           <li class="album" ng-repeat="album in player.playlist"
-              ng-class="player.current.album == $index && 'current'">
+              ng-class="{current: player.current.album == $index}">
             <button class="queue remove" ng-click="player.playlist.remove(album)"></button>
             <span class="album-title">{{album.title}}</span>
             <span class="artist-name">{{album.artist}}</span>
             <ol class="tracks">
               <li ng-repeat="track in album.tracks" class="track"
-                  ng-class="player.current.track == $index && 'current'"
+                  ng-class="{current: player.current.track == $index}"
                   ng-click="player.play($index, $parent.$index)">{{track.title}}</li>
             </ol>
           </li>
