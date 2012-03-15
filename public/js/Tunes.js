@@ -26,24 +26,22 @@
     ]);
   });
 
-  window.TunesCtrl = function($http, player) {
-    var scope = this;
-    scope.player = player;
+  window.TunesCtrl = function($scope, $http, player) {
+    $scope.player = player;
     $http.get('albums.json').success(function(data) {
-      scope.albums = data;
+      $scope.albums = data;
     });
   };
 
 
-  tunesApp.factory('player', function(audio) {
+  tunesApp.factory('player', function(audio, $rootScope) {
     var player,
         playlist = [],
         paused = false,
         current = {
           album: 0,
           track: 0
-        },
-        scope = this;
+        };
 
     player = {
       playlist: playlist,
@@ -115,7 +113,7 @@
     };
 
     audio.addEventListener('ended', function() {
-      scope.$apply(player.next);
+      $rootScope.$apply(player.next);
     }, false);
 
     return player;

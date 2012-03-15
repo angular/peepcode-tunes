@@ -29,11 +29,12 @@ beforeEach(module('tunesApp'));
 
 describe('TunesCtrl', function() {
 
-  it('should initialize the scope for the view', inject(function($rootScope, $httpBackend) {
+  it('should initialize the scope for the view', inject(function($rootScope, $httpBackend, $controller) {
     var ctrlScope;
 
     $httpBackend.expectGET('albums.json').respond(albumData);
-    ctrlScope = $rootScope.$new(TunesCtrl);
+    ctrlScope = $rootScope.$new();
+    $controller(TunesCtrl, {$scope: ctrlScope});
 
     expect(ctrlScope.player.playlist.length).toBe(0);
     expect(ctrlScope.albums).toBeUndefined();
@@ -55,11 +56,17 @@ describe('player service', function() {
       play: jasmine.createSpy('play'),
       pause: jasmine.createSpy('pause'),
       src: undefined,
-      addEventListener: jasmine.createSpy('addEventListener')
+      addEventListener: jasmine.createSpy('addEventListener').andCallFake(
+          function(event, fn, capture) {
+        expect(event).toBe('ended');
+        expect(capture).toBe(false);
+        audioMock.endedFn = fn;
+      })
     }
     $provide.value('audio', audioMock);
   }));
   
+
   beforeEach(inject(function($injector) {
     player = $injector.get('player');
   }));
@@ -77,7 +84,17 @@ describe('player service', function() {
   });
 
 
+  it('should call player.next() when the ended event fires', function() {
+    player.playlist.add(albumData[0]);
+    player.play();
+    expect(audioMock.src).toBe("/music/Album A Track A.mp3");
+    audioMock.endedFn();
+    expect(audioMock.src).toBe("/music/Album A Track B.mp3");
+  });
+
+
   describe('play', function() {
+
     it('should not do anything if playlist is empty', function() {
       player.play();
       expect(player.playing).toBe(false);
@@ -109,6 +126,7 @@ describe('player service', function() {
 
 
   describe('pause', function() {
+
     it('should not do anything if player is not playing', function() {
       player.pause();
       expect(player.playing).toBe(false);
@@ -127,6 +145,7 @@ describe('player service', function() {
 
 
   describe('reset', function() {
+
     it('should stop currently playing song and reset the internal state', function() {
       player.playlist.add(albumData[0]);
       player.current.track = 1;
@@ -142,6 +161,7 @@ describe('player service', function() {
 
 
   describe('next', function() {
+
     it('should do nothing if playlist is empty', function() {
       player.next();
       expect(player.current).toEqual({album: 0, track: 0});
@@ -182,6 +202,7 @@ describe('player service', function() {
 
 
   describe('previous', function() {
+
     it('should do nothing if playlist is empty', function() {
       player.previous();
       expect(player.current).toEqual({album: 0, track: 0});
@@ -220,12 +241,14 @@ describe('player service', function() {
 
 
   describe('playlist', function() {
+
     it('should be a simple array', function() {
       expect(player.playlist.constructor).toBe([].constructor);
     });
 
 
     describe('add', function() {
+
       it("should add an album to the playlist if it's not present there already", function() {
         expect(player.playlist.length).toBe(0);
         player.playlist.add(albumData[0]);
@@ -239,6 +262,7 @@ describe('player service', function() {
 
 
     describe('remove', function() {
+
       it('should remove an album from the playlist if present', function() {
         player.playlist.add(albumData[0]);
         player.playlist.add(albumData[1]);
@@ -260,6 +284,7 @@ describe('player service', function() {
 
 
 describe('audio service', function() {
+
   it('should create and return html5 audio element', inject(function(audio) {
     expect(audio.nodeName).toBe('AUDIO');
   }));
