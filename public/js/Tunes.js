@@ -4,27 +4,27 @@
 
   var tunesApp = angular.module('tunesApp', []);
 
-  // app with fake backend
-  var tunesAppFake = angular.module('tunesAppFake', ['tunesApp', 'ngMockE2E']);
-  tunesAppFake.run(function($httpBackend) {
-    $httpBackend.whenGET(/templates\/.*/).passThrough();
-    $httpBackend.whenGET('albums.json').respond([
-      {
-        "title": "test album",
-        "artist": "test artist",
-        "tracks": [
-          {
-            "title": "test track 1",
-            "url": "music/blue.mp3"
-          },
-          {
-            "title": "test track 2",
-            "url": "music/jazz.mp3"
-          }
-        ]
-      }
-    ]);
-  });
+  // // app with fake backend (uncoment if you want to use it)
+  // var tunesAppFake = angular.module('tunesAppFake', ['tunesApp', 'ngMockE2E']);
+  // tunesAppFake.run(function($httpBackend) {
+  //   $httpBackend.whenGET(/templates\/.*/).passThrough();
+  //   $httpBackend.whenGET('albums.json').respond([
+  //     {
+  //       "title": "test album",
+  //       "artist": "test artist",
+  //       "tracks": [
+  //         {
+  //           "title": "test track 1",
+  //           "url": "music/blue.mp3"
+  //         },
+  //         {
+  //           "title": "test track 2",
+  //           "url": "music/jazz.mp3"
+  //         }
+  //       ]
+  //     }
+  //   ]);
+  // });
 
   window.TunesCtrl = function($scope, $http, player) {
     $scope.player = player;
