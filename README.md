@@ -5,6 +5,9 @@
 - Allows queueing albums for playback
 - Plays the queue, one track at a time
 
+Live Demo: <http://angular.github.com/peepcode-tunes/public/>
+
+
 ## Rewrite notes
 
 Have you seen any of the awesome [Peepcode screencasts](http://peepcode.com/)? They are well done.
