@@ -72,6 +72,7 @@
 
       reset: function() {
         player.pause();
+        paused = false;
         current.album = 0;
         current.track = 0;
       },
