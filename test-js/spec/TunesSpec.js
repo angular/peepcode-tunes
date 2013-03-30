@@ -278,6 +278,21 @@ describe('player service', function() {
         player.playlist.remove(albumData[0]); // nothing happend, not in the playlist
         expect(player.playlist.length).toBe(0);
       });
+      
+      it('should not continue playing a removed song after removing an album from the playlist', function() {
+        player.playlist.add(albumData[0]);
+        player.playlist.add(albumData[1]);
+        player.play();
+        expect(player.playing).toBe(true);
+        expect(audioMock.src).toBe("/music/Album A Track A.mp3");
+        
+        player.playlist.remove(albumData[0]);
+        expect(player.playing).toBe(false);
+        
+        player.play();
+        expect(player.playing).toBe(true);
+        expect(audioMock.src).toBe("/music/Album B Track A.mp3");
+      });
     });
   });
 });
